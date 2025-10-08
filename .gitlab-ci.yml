@@ -1,20 +1,51 @@
+image: python:3.11
+
 stages:
   - build
   - test
   - deploy
 
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+
+before_script:
+  - python -V
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
+
 build:
   stage: build
   script:
-    - make build
+    - echo "Build: no hay artefactos en esta práctica"
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 hour
 
 test:
   stage: test
   script:
-    - pytest
+    - mkdir -p reports
+    - pytest --junitxml=reports/junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: reports/junit.xml
+    paths:
+      - reports/
+    expire_in: 1 hour
 
 deploy:
   stage: deploy
   script:
-    - make deploy
+    - echo "Deploy simulado (agrega tus pasos reales aquí)"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - when: never
+
 
